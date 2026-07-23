@@ -1,14 +1,13 @@
 """
 Flask Backend for AI Text Detection System
 
-Author: Voda Akshitha
 Description:
 Provides REST API endpoints for AI vs Human text classification,
 real-time monitoring, and user feedback.
 """
 from flask import Flask, request, jsonify, send_file # Import send_file
-import os # Import os for file path checks
-from predictor import predict_batch, monitor_stats, monitor_logs, log_feedback, feedback_logs
+import os 
+from predictor import *
 
 app = Flask(__name__)
 
@@ -16,25 +15,23 @@ app = Flask(__name__)
 def predict():
     data = request.get_json()
     texts = data.get("texts", [])
-    prediction_strategy = data.get("strategy", "ensemble")
-
+    prediction_strategy = "default"
     predictions = predict_batch(texts, prediction_strategy)
-    return jsonify(predictions)
 
 @app.route("/monitor", methods=["GET"])
 def monitor():
-    # This endpoint now returns aggregated summary and recent logs
+    # Returns monitoring information
     return jsonify({
         "summary": dict(monitor_stats),
         "recent_logs": monitor_logs[-50:] # Limit to last 50 logs for performance
     })
 
-# NEW: Endpoint to get full monitor stats for analytics graphs
+# Returns monitoring statistics
 @app.route("/get_monitor_stats", methods=["GET"])
 def get_monitor_stats():
     return jsonify(dict(monitor_stats))
 
-# NEW: Endpoint to get all recent logs for the history table
+# Returns monitoring logs
 @app.route("/get_monitor_logs", methods=["GET"])
 def get_monitor_logs():
     return jsonify(monitor_logs) # Return all logs for table processing on client side
